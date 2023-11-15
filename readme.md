@@ -3,8 +3,8 @@
 Shows a telescope window with project specific actions (like `npm install`).
 
 Supported:
-- `cargo` for rust
-- `npm` for ECMAScript
+- `cargo`
+- `npm`
 - `make`
 
 ## Install
@@ -20,6 +20,7 @@ require "lazy" .setup {
         dependencies = {
             "nvim-telescope/telescope.nvim",
         },
+        lazy = true,
     },
 }
 ```
@@ -29,6 +30,10 @@ require "lazy" .setup {
 None at the moment.
 
 ## Usage
+
+All functions operate on the current working directory.
+You can use [project.nvim](https://github.com/ahmedkhalf/project.nvim)
+to automatically set your working directory to your project root.
 
 ```lua
 require "project_actions" .show_actions()
@@ -59,4 +64,4 @@ Run the current file.
 
 ### JavaScript
 
-Run current file with node.
+Run the current file with node.
