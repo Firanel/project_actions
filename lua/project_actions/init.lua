@@ -4,20 +4,41 @@ local conf = require "telescope.config".values
 local actions = require "telescope.actions"
 local action_state = require "telescope.actions.state"
 
-local function tbl_push(tbl, ...)
-  for _, value in ipairs{...} do
-    table.insert(tbl, value)
-  end
-end
+local utils = require "project_actions.utils"
 
-local function tbl_position(tbl, needle, tbl_as_patterns)
-  for i, value in ipairs(tbl) do
-    if tbl_as_patterns and needle:match(value) or value == needle then
-      return i
-    end
-  end
-  return nil
-end
+--#region Configuration
+
+local project_actions_map = {
+  npm = {
+    condition = "package.json",
+    load = "project_actions.actions.npm",
+    exclude_file_actions = { "javascript", "typescript" },
+  },
+  cargo = {
+    condition = "cargo.toml",
+    load = "project_actions.actions.cargo",
+    exclude_file_actions = { "rust" },
+  },
+  make = {
+    condition = "makefile",
+    load = "project_actions.actions.make",
+  },
+}
+
+local file_actions_map = {
+  javascript = "project_actions.file_actions.js",
+  lua = "project_actions.file_actions.lua",
+}
+
+local default_options = {
+  file_actions = file_actions_map,
+  project_actions = utils.table_values(project_actions_map),
+}
+
+local global_options = utils.table_clone(default_options)
+
+--#endregion
+--#region private functions
 
 local function run_value(value, cmd, buffer)
   local run_type = type(value.run)
@@ -55,6 +76,41 @@ local function show_picker(picker, telescope_opts, buffer)
   }):find()
 end
 
+--#endregion
+--#region public functions
+
+local function setup(opts)
+  if not opts then return end
+
+  local project_actions = opts["project_actions"]
+  if project_actions then
+    local pa_option = project_actions["extend"]
+      and default_options["project_actions"]
+      or {}
+    for _, action in ipairs(project_actions) do
+      table.insert(pa_option, type(action) == "string"
+        and project_actions_map[action]
+        or action)
+    end
+    global_options["project_actions"] = pa_option
+  end
+
+  local file_actions = opts["file_actions"]
+  if file_actions then
+    local fa_option = file_actions["extend"]
+      and default_options["file_actions"]
+      or {}
+    for filetype, source in pairs(file_actions) do
+      if type(filetype) == "number" then
+        fa_option[source] = file_actions_map[source]
+      elseif filetype ~= "extend" then
+        fa_option[filetype] = source
+      end
+    end
+    global_options["file_actions"] = fa_option
+  end
+end
+
 local function show_actions(telescope_opts, buffer)
   telescope_opts = telescope_opts or require "telescope.themes".get_dropdown {}
   buffer = buffer or vim.inspect_pos().buffer
@@ -62,28 +118,40 @@ local function show_actions(telescope_opts, buffer)
   local picker_groups = {}
   local exclude = {}
 
-  for name, _ in vim.fs.dir "." do
-    name = name:lower()
-    if name == "package.json" then
+  local folder = {}
+  for name, type in vim.fs.dir "." do
+    if type == "file" then
+      folder[name] = true
+    end
+  end
+
+  for _, action in ipairs(global_options["project_actions"]) do
+    -- error(vim.inspect(action))
+    local condition = action["condition"]
+    if type(condition) ~= "string"
+      and condition(folder) == true
+      or folder[condition] == true
+    then
+      local load = action["load"]
+      local exclude_files = action["exclude_file_action"]
       table.insert(picker_groups,
-        require "project_actions.actions.npm" (name, telescope_opts))
-      tbl_push(exclude, "javascript", "typescript")
-    elseif name == "cargo.toml" then
-      table.insert(picker_groups,
-        require "project_actions.actions.cargo" (telescope_opts))
-      table.insert(exclude, "rust")
-    elseif name == "makefile" then
-      table.insert(picker_groups,
-        require "project_actions.actions.make" (telescope_opts))
+        type(load) == "string" and require(load)() or load())
+      if exclude_files ~= nil then
+        for i = 1, #exclude_files do
+          exclude[exclude_files[i]] = true
+        end
+      end
     end
   end
 
   local filetype = vim.filetype.match { buf = 0 }
-  if nil == tbl_position(exclude, filetype) then
-    if filetype == "lua" then
-      tbl_push(picker_groups, unpack(require "project_actions.file_actions.lua"))
-    elseif filetype == "javascript" then
-      tbl_push(picker_groups, unpack(require "project_actions.file_actions.js"))
+  local file_action = global_options["file_actions"][filetype]
+  if exclude[filetype] ~= true and file_action ~= nil then
+    for _, action in ipairs(type(file_action) == "string"
+      and require(file_action)
+      or file_action())
+    do
+      table.insert(picker_groups, action)
     end
   end
 
@@ -122,6 +190,9 @@ local function show_actions(telescope_opts, buffer)
   end
 end
 
+--#endregion
+
 return {
   show_actions = show_actions,
+  setup = setup,
 }
