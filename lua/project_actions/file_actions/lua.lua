@@ -1,4 +1,4 @@
-return {
+local lua_actions = {
   {
     name = "Lua: run",
     run = function(buf)
@@ -6,3 +6,5 @@ return {
     end,
   },
 }
+
+return function() return lua_actions end

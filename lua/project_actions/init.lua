@@ -26,7 +26,7 @@ local project_actions_map = {
 }
 
 local file_actions_map = {
-  javascript = "project_actions.file_actions.js",
+  javascript = "project_actions.file_actions.javascript",
   lua = "project_actions.file_actions.lua",
 }
 
@@ -119,10 +119,8 @@ local function show_actions(telescope_opts, buffer)
   local exclude = {}
 
   local folder = {}
-  for name, type in vim.fs.dir "." do
-    if type == "file" then
-      folder[name] = true
-    end
+  for name, _ in vim.fs.dir "." do
+    folder[name] = true
   end
 
   for _, action in ipairs(global_options["project_actions"]) do
@@ -148,7 +146,7 @@ local function show_actions(telescope_opts, buffer)
   local file_action = global_options["file_actions"][filetype]
   if exclude[filetype] ~= true and file_action ~= nil then
     for _, action in ipairs(type(file_action) == "string"
-      and require(file_action)
+      and require(file_action)()
       or file_action())
     do
       table.insert(picker_groups, action)

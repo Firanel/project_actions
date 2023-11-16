@@ -1,4 +1,4 @@
-return {
+local js_actions = {
   {
     name = "Node: run",
     run = function(buf)
@@ -6,3 +6,5 @@ return {
     end
   },
 }
+
+return function() return js_actions end
