@@ -6,7 +6,7 @@ local function gradle_run(_)
   local tasks_out = assert(io.popen(string.format("%s tasks --all 2> /dev/null", cmd), "r"))
   local tasks = {}
   for line in tasks_out:lines() do
-    local desc, name = line:match "^((%w+) %- .+)$"
+    local desc, name = line:match "^(([%w:]+) %- .+)$"
     if name then
       table.insert(tasks, {
         name = desc,
