@@ -31,6 +31,7 @@ local project_actions_map = {
 
 local file_actions_map = {
   javascript = "project_actions.file_actions.javascript",
+  typescript = "project_actions.file_actions.typescript",
   lua = "project_actions.file_actions.lua",
 }
 

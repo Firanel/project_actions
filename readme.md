@@ -12,6 +12,7 @@ Supported project types:
 Supported file types:
 - `lua`
 - `javascript`
+- `typescript` (only with bun)
 
 ## Install
 
@@ -163,4 +164,8 @@ Run the current file.
 
 ### JavaScript
 
-Run the current file with node.
+Run the current file with node or bun.
+
+### Typescript
+
+Run the current file with bun.

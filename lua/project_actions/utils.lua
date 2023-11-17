@@ -3,7 +3,7 @@ local function prompt_run(prompt, run_prefix, allow_empty)
     prompt = prompt .. (allow_empty and " ?> " or " > "),
   }, function(input)
     if input and (allow_empty or not input:match "^[%s%c]*$") then
-      vim.cmd(run_prefix .. input)
+      vim.cmd(run_prefix .. " " .. input)
     end
   end)
 end
