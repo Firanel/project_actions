@@ -32,9 +32,14 @@ local function table_clone(t)
   return clone
 end
 
+local function is_windows()
+  return package.config:sub(1, 1) == "\\"
+end
+
 return {
   prompt_run = prompt_run,
   table_keys = table_keys,
   table_values = table_values,
   table_clone = table_clone,
+  is_windows = is_windows,
 }

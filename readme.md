@@ -7,6 +7,7 @@ Supported project types:
 - `cargo`
 - `npm`
 - `make`
+- `gradle`
 
 Supported file types:
 - `lua`
@@ -148,6 +149,11 @@ Also shows `make` option for user specified targets.
 
 Supports basic npm functions like `npm install`
 and can run scripts from `package.json`.
+
+### Gradle
+
+Shows all tasks from `gradlew tasks --all`.
+Running this the first time can take very long.
 
 ## Features for single files
 

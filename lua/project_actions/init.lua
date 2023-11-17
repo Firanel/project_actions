@@ -23,6 +23,10 @@ local project_actions_map = {
     condition = "makefile",
     load = "project_actions.actions.make",
   },
+  gradle = {
+    condition = ".gradle",
+    load = "project_actions.actions.gradle",
+  },
 }
 
 local file_actions_map = {
