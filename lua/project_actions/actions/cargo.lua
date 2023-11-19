@@ -1,4 +1,3 @@
-local json = require "json"
 local pickers = require "telescope.pickers"
 local finders = require "telescope.finders"
 local conf = require "telescope.config".values
@@ -13,7 +12,7 @@ local function cargo_remove(telescope_opts)
     vim.notify("Cargo not found")
     return
   end
-  local metadata = json.decode(fd:read "*a")
+  local metadata = vim.json.decode(fd:read "*a")
   fd:close()
 
   local crates = {}

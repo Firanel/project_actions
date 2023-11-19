@@ -138,7 +138,7 @@ local function show_actions(telescope_opts, buffer)
       local load = action["load"]
       local exclude_files = action["exclude_file_action"]
       table.insert(picker_groups,
-        type(load) == "string" and require(load)() or load())
+        type(load) == "string" and require(load)(telescope_opts) or load(telescope_opts))
       if exclude_files ~= nil then
         for i = 1, #exclude_files do
           exclude[exclude_files[i]] = true
@@ -151,8 +151,8 @@ local function show_actions(telescope_opts, buffer)
   local file_action = global_options["file_actions"][filetype]
   if exclude[filetype] ~= true and file_action ~= nil then
     for _, action in ipairs(type(file_action) == "string"
-      and require(file_action)()
-      or file_action())
+      and require(file_action)(telescope_opts)
+      or file_action(telescope_opts))
     do
       table.insert(picker_groups, action)
     end

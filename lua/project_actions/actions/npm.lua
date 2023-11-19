@@ -1,4 +1,3 @@
-local json = require "json"
 local pickers = require "telescope.pickers"
 local finders = require "telescope.finders"
 local conf = require "telescope.config".values
@@ -36,13 +35,13 @@ local function npm_remove(package_json, telescope_opts)
   }):find()
 end
 
-local function npm_run(package_filename, telescope_opts)
-  local fd = io.open(package_filename, "r")
+local function npm_run(telescope_opts)
+  local fd = io.open("package.json", "r")
   if fd == nil then
     error("Couldn't open package.json")
   end
 
-  local package_json = json.decode(fd:read "*a")
+  local package_json = vim.json.decode(fd:read "*a")
   fd:close()
 
   local scripts = {
