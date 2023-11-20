@@ -4,13 +4,13 @@ local lua_actions = {
   {
     name = "lua: run",
     run = function(buf)
-      vim.cmd(string.format(":!lua '%s'", vim.api.nvim_buf_get_name(buf)))
+      vim.cmd(string.format("!lua '%s'", vim.api.nvim_buf_get_name(buf)))
     end,
   },
   {
     name = "lua: run with arguments",
     run = function(buf)
-      local cmd = string.format(":!lua '%s'", vim.api.nvim_buf_get_name(buf))
+      local cmd = string.format("!lua '%s'", vim.api.nvim_buf_get_name(buf))
       prompt_run(cmd, cmd, true)
     end,
   },

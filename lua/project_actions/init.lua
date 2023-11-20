@@ -15,12 +15,12 @@ local project_actions_map = {
     exclude_file_actions = { "javascript", "typescript" },
   },
   cargo = {
-    condition = "cargo.toml",
+    condition = {"Cargo.toml", "cargo.toml"},
     load = "project_actions.actions.cargo",
     exclude_file_actions = { "rust" },
   },
   make = {
-    condition = "makefile",
+    condition = {"GNUmakefile", "makefile", "Makefile"},
     load = "project_actions.actions.make",
   },
   gradle = {
@@ -48,9 +48,15 @@ local global_options = utils.table_clone(default_options)
 local function run_value(value, cmd, buffer)
   local run_type = type(value.run)
   if run_type == "nil" then
-    vim.cmd(string.format("!%s %s", cmd or "", value.name))
+    vim.cmd(string.format("%s %s", cmd or "", value.name))
   elseif run_type == "string" then
     vim.cmd(value.run)
+  elseif run_type == "table" then
+    utils.prompt_run(
+      value.run.prompt,
+      value.run.cmd or ((cmd or "") .. " %s"),
+      value.run.empty
+    )
   else
     value.run(buffer)
   end
@@ -90,8 +96,8 @@ local function setup(opts)
   local project_actions = opts["project_actions"]
   if project_actions then
     local pa_option = project_actions["extend"]
-      and default_options["project_actions"]
-      or {}
+        and default_options["project_actions"]
+        or {}
     for _, action in ipairs(project_actions) do
       table.insert(pa_option, type(action) == "string"
         and project_actions_map[action]
@@ -103,8 +109,8 @@ local function setup(opts)
   local file_actions = opts["file_actions"]
   if file_actions then
     local fa_option = file_actions["extend"]
-      and default_options["file_actions"]
-      or {}
+        and default_options["file_actions"]
+        or {}
     for filetype, source in pairs(file_actions) do
       if type(filetype) == "number" then
         fa_option[source] = file_actions_map[source]
@@ -123,22 +129,22 @@ local function show_actions(telescope_opts, buffer)
   local picker_groups = {}
   local exclude = {}
 
-  local folder = {}
-  for name, _ in vim.fs.dir "." do
-    folder[name] = true
-  end
-
   for _, action in ipairs(global_options["project_actions"]) do
-    -- error(vim.inspect(action))
     local condition = action["condition"]
-    if type(condition) ~= "string"
-      and condition(folder) == true
-      or folder[condition] == true
-    then
+    local found = type(condition) == "function"
+      and condition()
+      or vim.fs.find(condition, {
+        upward = true,
+        limit = 1,
+        stop = vim.loop.os_homedir(),
+      })[1]
+    if found then
       local load = action["load"]
       local exclude_files = action["exclude_file_action"]
       table.insert(picker_groups,
-        type(load) == "string" and require(load)(telescope_opts) or load(telescope_opts))
+        type(load) == "string"
+        and require(load)(found, telescope_opts)
+        or load(found, telescope_opts))
       if exclude_files ~= nil then
         for i = 1, #exclude_files do
           exclude[exclude_files[i]] = true

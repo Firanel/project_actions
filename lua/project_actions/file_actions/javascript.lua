@@ -4,13 +4,13 @@ local js_actions = {
   {
     name = "node: run",
     run = function(buf)
-      vim.cmd(string.format(":!node '%s'", vim.api.nvim_buf_get_name(buf)))
+      vim.cmd(string.format("!node '%s'", vim.api.nvim_buf_get_name(buf)))
     end
   },
   {
     name = "node: run with arguments",
     run = function(buf)
-      local cmd = string.format(":!node '%s'", vim.api.nvim_buf_get_name(buf))
+      local cmd = string.format("!node '%s'", vim.api.nvim_buf_get_name(buf))
       prompt_run(cmd, cmd, true)
     end,
   },

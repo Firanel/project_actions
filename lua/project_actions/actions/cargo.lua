@@ -6,7 +6,7 @@ local action_state = require "telescope.actions.state"
 
 local prompt_run = require "project_actions.utils".prompt_run
 
-local function cargo_remove(telescope_opts)
+local function cargo_remove(_, telescope_opts)
   local fd = io.popen("cargo metadata --quiet --color never --format-version 1")
   if fd == nil then
     vim.notify("Cargo not found")
@@ -46,12 +46,16 @@ end
 local function cargo_run(telescope_opts)
   return {
     title = "Cargo",
-    cmd = "cargo",
+    cmd = "!cargo",
     values = {
       -- Build Commands
       {
         name = "bench",
-        run = function() prompt_run("benchname", "!cargo bench ", true) end
+        run = {
+          prompt = "benchname",
+          cmd = "!cargo bench %s",
+          empty = true,
+        }
       },
       { name = "build" },
       { name = "check" },
@@ -62,29 +66,53 @@ local function cargo_run(telescope_opts)
       { name = "run" },
       {
         name = "run with",
-        run = function() prompt_run("args", "!cargo run -- ", true) end
+        -- run = function() prompt_run("args", "!cargo run -- ", true) end
+        run = {
+          prompt = "args",
+          cmd = "!cargo run -- %s",
+          empty = true,
+        }
       },
       {
         name = "rustc",
-        run = function() prompt_run("rustc args", "!cargo rustc -- ", true) end
+        run = {
+          prompt = "rustc args",
+          cmd = "!cargo rustc -- %s",
+          empty = true,
+        }
       },
       {
         name = "rustdoc",
-        run = function() prompt_run("rustdoc args", "!cargo rustdoc -- ", true) end
+        run = {
+          prompt = "rustdoc args",
+          cmd = "!cargo rustdoc -- %s",
+          empty = true,
+        }
       },
       { name = "test" },
       {
         name = "test name",
-        run = function() prompt_run("test", "!cargo test ", true) end
+        run = {
+          prompt = "test",
+          cmd = "!cargo test %s",
+          empty = true,
+        }
       },
       {
         name = "report",
-        run = function() prompt_run("type", "!cargo report ") end
+        run = {
+          prompt = "type",
+          cmd = "!cargo report %s",
+          empty = true,
+        }
       },
       -- Manifest Commands
       {
         name = "add",
-        run = function() prompt_run("crate", "!cargo add ") end
+        run = {
+          prompt = "crate",
+          cmd = "!cargo add %s",
+        }
       },
       {
         name = "remove",
@@ -95,7 +123,10 @@ local function cargo_run(telescope_opts)
       -- Package Commands
       {
         name = "install",
-        run = function() prompt_run("crate", "!cargo install ") end
+        run = {
+          prompt = "crate",
+          cmd = "!cargo install %s",
+        }
       },
     },
   }

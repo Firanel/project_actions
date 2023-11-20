@@ -1,8 +1,8 @@
-local prompt_run = require "project_actions.utils" .prompt_run
+local utils = require "project_actions.utils"
 
 local function get_make_targets()
   -- get data
-  local process = io.popen("make -qp 2> /dev/null", "r")
+  local process = io.popen("make -qp 2> "..utils.null_file, "r")
   if not process then return {} end
 
   local targets = {}
@@ -27,21 +27,23 @@ local function get_make_targets()
   return result
 end
 
-local function make_run(_)
+local function make_run(_, _)
   local targets = get_make_targets()
   for i, target in ipairs(targets) do
     targets[i] = {
       name = target,
-      run = string.format("!make %s", target),
     }
   end
   table.insert(targets, 1, {
     name = "make",
-    run = function () prompt_run("target", "!make ", true) end
+    run = {
+      prompt = "target",
+      empty = true,
+    }
   })
   return {
     title = "Make",
-    cmd = "make",
+    cmd = "!make",
     values = targets,
   }
 end

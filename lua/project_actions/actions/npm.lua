@@ -4,8 +4,6 @@ local conf = require "telescope.config".values
 local actions = require "telescope.actions"
 local action_state = require "telescope.actions.state"
 
-local prompt_run = require "project_actions.utils" .prompt_run
-
 local function npm_remove(package_json, telescope_opts)
   local packages = {}
   for name, _ in pairs(package_json.dependencies or {}) do
@@ -35,8 +33,8 @@ local function npm_remove(package_json, telescope_opts)
   }):find()
 end
 
-local function npm_run(telescope_opts)
-  local fd = io.open("package.json", "r")
+local function npm_run(found, telescope_opts)
+  local fd = io.open(found, "r")
   if fd == nil then
     error("Couldn't open package.json")
   end
@@ -47,15 +45,20 @@ local function npm_run(telescope_opts)
   local scripts = {
     {
       name = "install",
-      run = function() prompt_run("package", "!npm install ", true) end,
+      run = {
+        prompt = "package",
+        empty = true,
+      }
     },
     {
       name = "install -D",
-      run = function() prompt_run("package", "!npm install -D ") end,
+      run = {
+        prompt = "package",
+      }
     },
     {
       name = "remove",
-      run = function ()
+      run = function()
         npm_remove(package_json, telescope_opts)
       end
     },
@@ -70,8 +73,9 @@ local function npm_run(telescope_opts)
 
   return {
     title = "NPM",
-    cmd = "npm",
+    cmd = "!npm",
     values = scripts,
+    root = vim.fs.dirname(found)
   }
 end
 
