@@ -37,7 +37,7 @@ local file_actions_map = {
 
 local default_options = {
   file_actions = file_actions_map,
-  project_actions = utils.table_values(project_actions_map),
+  project_actions = vim.tbl_values(project_actions_map),
 }
 
 local global_options = utils.table_clone(default_options)
