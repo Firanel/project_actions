@@ -1,8 +1,12 @@
 local utils = require "project_actions.utils"
 
-local function get_make_targets()
+local function get_make_targets(cmd)
   -- get data
-  local process = io.popen("make -qp 2> "..utils.null_file, "r")
+  local process = io.popen(string.format(
+    "%s -qp 2> %s",
+    cmd,
+    utils.null_file
+  ), "r")
   if not process then return {} end
 
   local targets = {}
@@ -28,7 +32,8 @@ local function get_make_targets()
 end
 
 local function make_run(found, _)
-  local targets = get_make_targets()
+  local cmd = string.format("make -C '%s'", vim.fs.dirname(found))
+  local targets = get_make_targets(cmd)
   for i, target in ipairs(targets) do
     targets[i] = {
       name = target,
@@ -43,7 +48,7 @@ local function make_run(found, _)
   })
   return {
     title = "Make",
-    cmd = string.format("!make -C '%s'", vim.fs.dirname(found)),
+    cmd = "!" .. cmd,
     values = targets,
   }
 end
