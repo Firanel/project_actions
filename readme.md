@@ -48,12 +48,15 @@ Builtin actions are lazy loaded.
 Set `extends = true` to extend default options instead of overriding them.
 The elements of the `project_actions` array are either names of builtin
 actions or objects of the form:
-- `condition`: name of a file which must be present in the project root
-    or a function, called with a set[^1] containing all the filenames in the
-    project root
+- `condition`: name of a file which must be present in the project root,
+    list of files
+    or a function which should return a found file
 - `load`: function which returns a project action object
-    or name of a module which exports said function
-- `exclude_file_actions` (optional): list of filetypes[^2] for which to disable
+    or name of a module which exports said function.
+    The function is called with 2 parameters:
+    - The found value (returned from the condition)
+    - Telescope options
+- `exclude_file_actions` (optional): list of filetypes[^1] for which to disable
     file actions
 
 Project action object:
@@ -63,17 +66,21 @@ Project action object:
 
 Entry object:
 - `name`: Name of the entry
-- `run` (optional): function to call or command as string,
-    if none is given uses `string.format("!%s %s", project.cmd, entry.name)`
+- `run` (optional): function to call, command as string
+    or run prompt object,
+    if none is given uses `string.format("%s %s", project.cmd, entry.name)`
     as command string
 
-[^1]: Table with the elements as keys and all values set to true.
+Run prompt object:
+- `prompt`: Prompt text
+- `run` (optional): see entry object run (without run prompt object)
+- `empty` (optional): boolean whether to allow empty argument
 
 ### File actions
 
 Set `extends = true` to extend default options instead of overriding them.
 Elements should be either names of builtin actions or a key value pair,
-where the key is the filetype[^2] and the value is a function which returns
+where the key is the filetype[^1] and the value is a function which returns
 a list of entry objects (see project actions) or the name of a module
 which exports said function.
 
@@ -96,7 +103,7 @@ end
 Default file actions can be imported from
 `project_actions.file_actions.<filetype>`.
 
-[^2]: Filetype means nvim file type not extension.
+[^1]: Filetype means nvim file type not extension.
 
 ### Example
 
