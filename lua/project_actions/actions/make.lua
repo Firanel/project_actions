@@ -27,7 +27,7 @@ local function get_make_targets()
   return result
 end
 
-local function make_run(_, _)
+local function make_run(found, _)
   local targets = get_make_targets()
   for i, target in ipairs(targets) do
     targets[i] = {
@@ -43,7 +43,7 @@ local function make_run(_, _)
   })
   return {
     title = "Make",
-    cmd = "!make",
+    cmd = string.format("!make -C '%s'", vim.fs.dirname(found)),
     values = targets,
   }
 end
