@@ -46,15 +46,16 @@ local global_options = utils.table_clone(default_options)
 --#region private functions
 
 local function run_value(value, cmd, buffer)
+  cmd = string.format("%s %s", cmd or "", value.name or "")
   local run_type = type(value.run)
   if run_type == "nil" then
-    vim.cmd(string.format("%s %s", cmd or "", value.name))
+    vim.cmd(cmd)
   elseif run_type == "string" then
     vim.cmd(value.run)
   elseif run_type == "table" then
     utils.prompt_run(
       value.run.prompt,
-      value.run.cmd or ((cmd or "") .. " %s"),
+      value.run.cmd or (cmd.." %s"),
       value.run.empty
     )
   else
